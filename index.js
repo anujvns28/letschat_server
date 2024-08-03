@@ -5,6 +5,8 @@ const fileUpload = require('express-fileupload');
 const { dbConnection } = require('./config/dbconnect');
 const { cloudinaryConnect } = require('./config/cloudinary');
 require("dotenv").config()
+const authRoute = require("../server/routes/auth");
+const cookieParser = require('cookie-parser');
 
 
 const port = process.env.PORT || 4000;
@@ -17,6 +19,7 @@ cloudinaryConnect();
 
 //middleware
 app.use(express.json());
+app.use(cookieParser())
 
 app.use(
 	cors({
@@ -31,6 +34,9 @@ app.use(
 		tempFileDir: "/tmp/",
 	})
 );
+
+// mountinh
+app.use("/api/v1/auth",authRoute);
 
 
 app.listen(port, () => {
