@@ -10,6 +10,9 @@ username:{
     required:true,
     unique:true
 },
+bio:{
+    type:String,
+},
 password:{
     type:String,
     required:true,

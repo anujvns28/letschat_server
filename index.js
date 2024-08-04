@@ -6,13 +6,18 @@ const { dbConnection } = require('./config/dbconnect');
 const { cloudinaryConnect } = require('./config/cloudinary');
 require("dotenv").config()
 const authRoute = require("../server/routes/auth");
+const userRoute = require("../server/routes/user");
+const chatRoute = require("../server/routes/chat");
 const cookieParser = require('cookie-parser');
+const { createUsers } = require('./sedders/user');
 
 
 const port = process.env.PORT || 4000;
 
 //dbconnection
 dbConnection();
+
+// createUsers(10);
 
 //cloudnary connect
 cloudinaryConnect();
@@ -37,6 +42,8 @@ app.use(
 
 // mountinh
 app.use("/api/v1/auth",authRoute);
+app.use("/api/v1/user",userRoute);
+app.use("/api/v1/chat",chatRoute);
 
 
 app.listen(port, () => {

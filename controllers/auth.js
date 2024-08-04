@@ -2,6 +2,7 @@ const User = require("../models/user");
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
 const { uploadImageToCloudinary } = require("../utils/imageUploader");
+const { options } = require("../routes/auth");
 
 
 // signup
@@ -12,6 +13,7 @@ exports.signUp = async(req,res) => {
         name,
         userName,
         password,
+        bio
       } = req.body
 
     console.log(req.files.avatar,"filses")
@@ -22,6 +24,7 @@ exports.signUp = async(req,res) => {
         !name ||
         ! userName ||
         !password ||
+        ! bio ||
         ! avatar
       ) {
         return res.status(403).send({
@@ -50,6 +53,7 @@ exports.signUp = async(req,res) => {
         name,
         username:userName,
         password: hashedPassword,
+        bio:bio,
         avatar : {
             public_id : avatarUrl.public_id,
             url : avatarUrl.url
@@ -151,20 +155,20 @@ exports.login = async (req, res) => {
   }
 
 
-  exports.profile = async(req,res) => {
-    try{
-        
-        return res.status(200).json({
-            success:true,
-            messeage:"Profile fetched successfully"
-        })
-    }catch(err){
-        console.log(err)
-        return res.status(500).json({
-            success:false,
-            message:"error occured in profile fatching"
-        })
+
+
+  exports.logout = (req,res) => {
+    const options = {
+        expires:0,
     }
+
+    return res.cookie("token","",options).status(200).json({
+        success:false,
+        message:"logout successfully"
+    })
   }
+
+
+
 
 
