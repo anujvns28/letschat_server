@@ -118,7 +118,7 @@ exports.login = async (req, res) => {
       console.log(user)
   
       //  Compare Password
-      if(await bcrypt.compare(password, user.password)) {
+      if(!await bcrypt.compare(password, user.password)) {
         const token = jwt.sign(
           {username:user.username,_id:user._id,},
           process.env.JWT_SECRET,

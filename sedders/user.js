@@ -1,5 +1,7 @@
+const Chat = require("../models/chat");
+const Messeage = require("../models/messeage");
 const user = require("../models/user");
-const {faker} = require("@faker-js/faker")
+const {faker, simpleFaker} = require("@faker-js/faker")
 
 exports.createUsers = async(userNomber) => {
     try{
@@ -13,7 +15,7 @@ exports.createUsers = async(userNomber) => {
                 bio:faker.lorem.sentence(10),
                 avatar:{
                     public_id:faker.system.fileName(),
-                    url:faker.image.avatar()
+                    url:faker.image
                 }
             })
 
@@ -28,5 +30,4 @@ exports.createUsers = async(userNomber) => {
         console.log(err);
     }
 }
-
 

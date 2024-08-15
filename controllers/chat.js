@@ -500,3 +500,169 @@ exports.getChatDetails = async(req,res) => {
         })
     }
 }
+
+exports.renameChats = async(req,res) => {
+    try{
+        const chatId = req.params.chatId;
+        const chatName = req.body.chatName;
+
+        if(!chatId || !chatName){
+            return res.status(404).json({
+                success:false,
+                message:"all filds are required"
+            })
+        }
+
+        const groupChat = await chat.findById(chatId)
+        if(!groupChat){
+            return res.status(404).json({
+                success:false,
+                message:"chatID is not vallied"
+            })
+        }
+
+        if(!groupChat.groupChat){
+            return res.status(404).json({
+                success:false,
+                message:"this is not group Chat"
+            })
+        }
+
+        if(req.userId.toString() != groupChat.createor.toString()){
+            return res.status(404).json({
+                success:false,
+                message:"You are not allword to rename group"
+            })
+        }
+
+        groupChat.name = chatName;
+        await groupChat.save()
+
+        emitEvent(req,REFETCH_CHAT,groupChat.members,);
+
+        return res.status(200).json({
+            success:true,
+            message:"chat rename successfully"
+        })
+
+
+
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({
+            success:false,
+            message:"error occured in rename chag"
+        })
+    }
+}
+
+
+exports.deleteChats = async(req,res) => {
+    try{
+        const chatId = req.params.chatId;
+
+        if(!chatId){
+            return res.status(404).json({
+                success:false,
+                message:"chatId is required"
+            })
+        }
+
+        const groupChat = await chat.findById(chatId)
+        if(!groupChat){
+            return res.status(404).json({
+                success:false,
+                message:"chatID is not vallied kj"
+            })
+        }
+
+
+        if(groupChat.groupChat && req.userId.toString() != groupChat.createor.toString()){
+            return res.status(404).json({
+                success:false,
+                message:"You are not allword to rename group"
+            })
+        }
+
+        
+        if(groupChat.groupChat && !groupChat.members.includes(req.userId.toString())){
+            return res.status(404).json({
+                success:false,
+                message:"You are not allword to rename group"
+            })
+        }
+
+        // here we have to delete chats as well as attachments from mongodb
+
+        const messageWithAttachments = await Message.find({
+            chat : chatId,
+            attachments : {$exists:true ,$ne:[]}
+        });
+
+        const public_ids = [];
+
+        messageWithAttachments.forEach(({attachments}) => {
+            attachments.forEach(({public_id}) =>{
+                public_ids.push(public_id)
+            })
+        })
+
+        await Promise.all([
+            groupChat.deleteOne(),
+            Message.deleteMany({chat:chatId})
+        ])
+
+        
+
+        emitEvent(req,REFETCH_CHAT,groupChat.members,);
+
+        return res.status(200).json({
+            success:true,
+            message:"chat deleted successfully"
+        })
+
+
+
+    }catch(err){
+        console.log(err);
+        return res.status(500).json({
+            success:false,
+            message:"error occured in deleting chag"
+        })
+    }
+}
+
+
+exports.getMessages = async(req,res) => {
+    try{
+        const chatId = req.params.chatId;
+        const {page = 1} = req.query;
+
+        const limit = 20;
+        const skip = (page-1)*limit;
+        
+        const [messages,totalMessageCount] = await Promise.all([
+            Message.find({chat:chatId})
+            .sort({createdAt:-1})
+            .skip(skip)
+            .limit(limit)
+            .populate("sender", "name")
+            .lean(),
+            Message.countDocuments({chat:chatId})
+        ]);
+
+        const totalPage = Math.ceil(totalMessageCount/limit) || 0;
+
+        return res.status(200).json({
+            success:true,
+            message:messages.reverse(),
+            totalPage
+        })
+
+    }catch(err){
+        return res.status(500).jons({
+            success:false,
+            message:"error occurd in fetching messages"
+        })
+    }
+}

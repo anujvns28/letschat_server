@@ -9,7 +9,7 @@ const authRoute = require("../server/routes/auth");
 const userRoute = require("../server/routes/user");
 const chatRoute = require("../server/routes/chat");
 const cookieParser = require('cookie-parser');
-const { createUsers } = require('./sedders/user');
+
 
 
 const port = process.env.PORT || 4000;
@@ -17,7 +17,7 @@ const port = process.env.PORT || 4000;
 //dbconnection
 dbConnection();
 
-// createUsers(10);
+
 
 //cloudnary connect
 cloudinaryConnect();
