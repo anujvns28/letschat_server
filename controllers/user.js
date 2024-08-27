@@ -188,7 +188,61 @@ exports.getAllNotifaction = async (req, res) => {
     console.log(err);
     return res.status(500).json({
       success: false,
-      message: "error occured in notification",
+      message: "error occured in get my frainds",
+    });
+  }
+};
+
+exports.getMyFrainds = async (req, res) => {
+  try {
+    const chatId = req.query.chatId;
+
+    const chats = await Chat.find({
+      members: req.userId,
+      groupChat: false,
+    }).populate("members", "name avatar");
+
+    const frainds = chats.map(({ members }) => {
+      const otherUser = members.filter(
+        (member) => member._id.toString() !== req.userId.toString()
+      );
+
+      return {
+        _id: otherUser[0]._id,
+        name: otherUser[0].name,
+        avatar: otherUser[0].avatar,
+      };
+    });
+
+    if (chatId) {
+      const chat = await Chat.findById(chatId);
+
+      if (!chat) {
+        return res.status(404).json({
+          success: false,
+          message: "this is not vallied chat id",
+        });
+      }
+
+      const availableFrainds = frainds.filter(
+        (fraind) => !chat.members.includes(fraind._id)
+      );
+
+      return res.status(200).json({
+        success: true,
+        frainds: availableFrainds,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        frainds,
+      });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({
+      success: false,
+      message: "error occured in get my frainds",
     });
   }
 };

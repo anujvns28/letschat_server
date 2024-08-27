@@ -8,6 +8,7 @@ const {
   sendFraindRequest,
   acceptRequest,
   getAllNotifaction,
+  getMyFrainds,
 } = require("../controllers/user");
 
 // profile route
@@ -16,6 +17,7 @@ router.get("/searchUser", auth, searchUsers);
 router.put("/sendRequest", auth, sendFraindRequest);
 router.put("/acceptRequest", auth, acceptRequest);
 router.get("/allNotifaction", auth, getAllNotifaction);
+router.get("/frainds", auth, getMyFrainds);
 
 
 module.exports = router
