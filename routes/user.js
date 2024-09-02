@@ -20,4 +20,5 @@ router.get("/allNotifaction", auth, getAllNotifaction);
 router.get("/frainds", auth, getMyFrainds);
 
 
+
 module.exports = router
